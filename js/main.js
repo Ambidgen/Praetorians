@@ -35,6 +35,7 @@ import { paintPortrait } from './portrait.js';
 import { clearSave, loadSave, saveSave } from './store.js';
 import { isSoundEnabled, setSoundEnabled, sfx } from './audio.js';
 import { esc } from './util.js';
+import { castRow, sprite } from './sprites.js';
 
 const app = document.getElementById('app');
 
@@ -182,6 +183,10 @@ function renderTitle() {
         <button class="btn" data-action="hall">Hall of Emperors (${summary.served})</button>
         <button class="btn ghost" data-action="reset">Shred the Ledger</button>
       </div>
+      <section class="panel court" aria-label="The court">
+        <p class="kicker">The Court, in attendance</p>
+        <div class="cast-row">${castRow()}</div>
+      </section>
       <section class="panel settings" aria-label="Settings">
         <div class="setting-row">
           <span class="kicker">Difficulty</span>
@@ -343,7 +348,10 @@ function renderReign() {
         <p class="kicker">Dispatch from the Palatine &middot; ${esc(headline())}</p>
         <h3 class="event-title">${esc(ev ? ev.title : 'Nothing Happens')}</h3>
         <p class="event-text">${esc(ev ? ev.text : '')}</p>
-        <p class="advisor"><b>Advisor:</b> ${esc(advisorLine(reign))}</p>
+        <div class="advisor-row">
+          ${sprite('advisor', { scale: 0.5, index: 6, label: 'Court advisor' })}
+          <p class="advisor"><b>Advisor:</b> ${esc(advisorLine(reign))}</p>
+        </div>
         <div class="choices">${choices}</div>
         <p class="fine keys">Keys: 1&ndash;3 to choose &middot; Enter to continue &middot; M to mute</p>
       </section>
@@ -365,6 +373,7 @@ function renderOutcome(pending) {
   return `
     <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="outcome-title">
       <div class="panel modal">
+        <div class="modal-herald">${sprite('herald', { scale: 0.5, index: 5, label: 'Herald' })}</div>
         <p class="kicker">${gamble ? 'The dice have spoken' : 'Consequences, naturally'}</p>
         <h3 id="outcome-title">${esc(event.title)}</h3>
         <p class="chosen">You chose: &ldquo;${esc(choice.label)}&rdquo;</p>
@@ -404,6 +413,10 @@ function renderEnd() {
           <ul class="final-stats">${finalStats}</ul>
           <p class="legacy">Legacy score: <b>${record.legacy.toLocaleString('en-CA')}</b></p>
         </div>
+      </div>
+      <div class="bow">
+        ${sprite('courtier', { scale: 0.6, index: 3, label: 'A courtier bows' })}
+        <p class="fine">A courtier bows. It is customary, and it is the only thing anyone here has ever been asked to do.</p>
       </div>
       <div class="menu">
         <button class="btn" data-action="share">${state.copied ? 'Epitaph Copied' : 'Copy Epitaph'}</button>
@@ -448,6 +461,10 @@ function renderHall() {
       <span class="topbar-note">Hall of Emperors</span>
       ${soundButton()}
     </header>
+    <div class="hall-goose">
+      ${sprite('goose', { scale: 0.6, index: 9, label: 'The Goose' })}
+      <p class="fine">The Goose attends every sitting. Nobody has asked it to leave.</p>
+    </div>
     <h2 class="section-title">Former Emperors</h2>
     <p class="section-sub">Served: ${summary.served} &middot; Longest reign: ${summary.longest} day${summary.longest === 1 ? '' : 's'} &middot; Best legacy: ${summary.bestLegacy.toLocaleString('en-CA')} &middot; Most common ending: ${esc(summary.mostCommonCause ? CAUSES[summary.mostCommonCause].title : 'n/a')}</p>
     <ul class="hall">${rows}</ul>

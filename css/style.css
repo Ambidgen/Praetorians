@@ -621,3 +621,50 @@ ul, ol { margin: 0; padding: 0; }
 }
 
 button:focus-visible { outline: 3px dashed var(--gold-2); outline-offset: 4px; }
+
+/* ---------------------------------------------------------------------------
+   Sprites: four-frame breathing loops from tools/sprite_pipeline.py.
+   The sheet is four cells wide, so the background is 400% of the element and
+   each frame sits at 0%, 33.33% or 66.67% of the travel. The ping-pong order
+   (0, 1, 2, 1) gives an inhale, a full breath, and an exhale.
+   --------------------------------------------------------------------------- */
+.sprite {
+  display: inline-block;
+  flex: none;
+  width: calc(112px * var(--scale, 1));
+  height: calc(144px * var(--scale, 1));
+  background-repeat: no-repeat;
+  background-size: 400% 100%;
+  background-position: 0% 0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  animation: sprite-breathe 3.6s steps(1, end) infinite;
+  animation-delay: var(--delay, 0s);
+  filter: drop-shadow(3px 3px 0 var(--navy-3));
+}
+@keyframes sprite-breathe {
+  0%   { background-position: 0% 0; }
+  25%  { background-position: 33.333% 0; }
+  50%  { background-position: 66.667% 0; }
+  75%  { background-position: 33.333% 0; }
+  100% { background-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sprite { animation: none; }
+}
+
+.court { display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(100%, 760px); }
+.cast-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 6px 10px; }
+.cast-figure { margin: 0; display: flex; flex-direction: column; align-items: center; width: 96px; }
+.cast-figure figcaption { font-family: var(--body); font-size: 15px; line-height: 1.15; text-align: center; color: var(--muted); }
+
+.advisor-row { display: flex; align-items: flex-start; gap: 12px; }
+.advisor-row .advisor { flex: 1; min-width: 0; }
+
+.modal-herald { display: flex; justify-content: center; margin-bottom: 4px; }
+
+.bow { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 8px 0 4px; }
+.bow .fine { text-align: center; max-width: 60ch; }
+
+.hall-goose { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 8px; }
+.hall-goose .fine { text-align: center; }
