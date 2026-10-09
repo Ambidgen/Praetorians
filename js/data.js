@@ -208,7 +208,7 @@ export const EVENTS = [
     text: 'The bread has been replaced by a rumour about bread. The plebs are outside the Forum holding torches they borrowed from other torches.',
     choices: [
       { label: 'Import grain from Egypt. Egypt has opinions.', effects: { treasury: -20, plebs: 15 }, result: 'The grain arrived. So did Egypt\'s opinions, which were mostly about the price of the grain.' },
-      { label: 'Blame the bakers, publicly.', effects: { plebs: 5, senate: -5, paranoia: 5 }, result: 'The bakers are now enemies of Rome. Bread remains unavailable, but at least it is someone\'s fault.' },
+      { label: 'Blame the bakers, publicly.', setFlags: ['baker_blamed'], effects: { plebs: 5, senate: -5, paranoia: 5 }, result: 'The bakers are now enemies of Rome. Bread remains unavailable, but at least it is someone\'s fault.' },
       { label: 'Declare a Festival of Bread. It is mostly air.', effects: { plebs: 5, treasury: -5 }, result: 'The plebs ate the air with real gratitude. Several are now full, and most are sincerely thankful.' },
     ],
   },
@@ -217,7 +217,7 @@ export const EVENTS = [
     title: 'Requisition for Lions',
     text: 'The Circus requests lions. The Senate requests a budget. The lions request nothing. They are already hungry and have been for three days.',
     choices: [
-      { label: 'Fund the lions in full.', effects: { treasury: -15, plebs: 15 }, result: 'The lions are magnificent. The Senate has been informed that the lions are a "line item".' },
+      { label: 'Fund the lions in full.', setFlags: ['lions_fed'], effects: { treasury: -15, plebs: 15 }, result: 'The lions are magnificent. The Senate has been informed that the lions are a "line item".' },
       { label: 'Fund a smaller, sadder lion.', effects: { treasury: -5, plebs: 3 }, result: 'The plebs noticed. They are less impressed by sadness than you would think, but they are noticing.' },
       { label: 'Send a senator into the arena. Ratings, you know.', effects: { senate: -20, plebs: 15 }, result: 'The senator was not a great fighter. He was, however, extremely well liked by the lion.' },
     ],
@@ -264,7 +264,7 @@ export const EVENTS = [
     title: 'A Goose in the Forum',
     text: 'A goose has entered the Forum. It is not yours. It seems to think it is a senator. On the merits, it is correct.',
     choices: [
-      { label: 'Consecrate the goose.', effects: { plebs: 10, senate: -5 }, result: 'The goose has been declared holy. It has not been informed. It is honking at the altar.' },
+      { label: 'Consecrate the goose.', setFlags: ['goose_consecrated'], effects: { plebs: 10, senate: -5 }, result: 'The goose has been declared holy. It has not been informed. It is honking at the altar.' },
       { label: 'Chase the goose with a javelin.', effects: { morale: -5, paranoia: 5, plebs: 5 }, result: 'The goose survived, and so did the javelin. Only the Guard\'s dignity was lost.' },
       { label: 'Ignore the goose.', effects: { senate: -10 }, result: 'The goose was seated in the Senate by the Senate. It bit Senator Piso. Piso now wears a bandage and a new respect.' },
     ],
@@ -314,7 +314,7 @@ export const EVENTS = [
     text: 'Your tax farmers have discovered a new crop: taxes. They are harvesting heavily and have begun to name the fields after you.',
     choices: [
       { label: 'Let them farm.', effects: { treasury: 20, plebs: -15 }, result: 'A record harvest. The plebs are described in the ledgers as "fertile ground".' },
-      { label: 'Audit them, furiously.', effects: { treasury: 5, paranoia: 10, senate: 5 }, result: 'The audit found everything, including, somehow, you. The farmers are nervous. So are the accountants.' },
+      { label: 'Audit them, furiously.', setFlags: ['farmers_audited'], effects: { treasury: 5, paranoia: 10, senate: 5 }, result: 'The audit found everything, including, somehow, you. The farmers are nervous. So are the accountants.' },
       { label: 'Make them pay double, then hug them.', effects: { treasury: 10, plebs: 5, morale: -5 }, result: 'They paid double and were hugged. They will remember the hug forever, as a form of debt.' },
     ],
   },
@@ -383,6 +383,134 @@ export const EVENTS = [
       { label: 'Accept the paw print as a signature.', effects: { morale: -5, plebs: 10 }, result: 'The paw print is legally binding. The lions are, technically, citizens of Rome. They have not been informed.' },
     ],
   },
+  // ----- New general events (v0.2) -----
+  {
+    id: 'aqueduct_leak',
+    title: 'The Aqueduct Is Leaking',
+    text: 'The aqueduct has sprung a leak in the shape of a very polite question mark. Water is flowing uphill into the Senate bathhouse.',
+    choices: [
+      { label: 'Fund repairs, in marble.', effects: { treasury: -20, plebs: 10 }, result: 'The repairs are beautiful and take four years. The water has since learned to flow politely downhill.' },
+      { label: 'Summon the Water Guild.', effects: { treasury: -5, plebs: 5, senate: 5 }, result: 'The Water Guild arrived with buckets and a motion. The motion passed. The buckets are still a little wet.' },
+      { label: 'Declare the leak a miracle.', effects: { plebs: 5, paranoia: 5, senate: -5 }, result: 'The plebs have begun queuing to drink from the miracle. The Senate has asked whether it is also a tax.' },
+    ],
+  },
+  {
+    id: 'triumph_request',
+    title: 'A Triumph Has Been Requested',
+    text: 'A general returns from a victory over a river, which he has since annexed. He requests a parade, twelve elephants, and the right to be emperor for an afternoon.',
+    choices: [
+      { label: 'Grant a parade. Not the emperorship.', effects: { plebs: 15, treasury: -15 }, result: 'The parade was spectacular. The elephants were not invited to the Senate, and have taken it personally.' },
+      { label: 'Grant the emperorship, to be safe.', effects: { senate: -15, paranoia: 10, morale: -5 }, result: 'He was emperor for an afternoon. He was then made to stand in the rain, which is traditional.' },
+      { label: 'Deny the triumph. He was never there.', effects: { senate: 5, plebs: -10, paranoia: 5 }, result: 'The general has been declared absent. He is still at the gates, wearing a very convincing absence.' },
+    ],
+  },
+  {
+    id: 'locusts',
+    title: 'Locusts in the Senate Chamber',
+    text: 'A cloud of locusts has entered the Senate chamber during a debate. The senators cannot decide whether to vote or to swat.',
+    choices: [
+      { label: 'Call a vote on the locusts.', effects: { senate: 5, plebs: -5, paranoia: 5 }, result: 'The locusts were voted down, then up, then into the Forum, where they were reported as a faction.' },
+      { label: 'Hire the swatting guild.', effects: { treasury: -10, senate: 5 }, result: 'The guild swatted with great energy. The locusts swatted back, with greater numbers.' },
+      { label: 'Declare the locusts honorary senators.', effects: { senate: -5, plebs: 10, morale: -5 }, result: 'The locusts were seated at the back. They have since been more productive than the front row.' },
+    ],
+  },
+  {
+    id: 'oracle_email',
+    title: 'The Oracle Has Emailed',
+    text: 'The Oracle of Delphi has sent a message. It is in all capitals, contains three exclamation marks, and asks whether you received her previous message.',
+    choices: [
+      { label: 'Reply that you received it.', effects: { paranoia: -5, senate: 3 }, result: 'The Oracle is pleased. She has since sent a second message asking whether you received the reply.' },
+      { label: 'Ask for a prophecy about the Treasury.', effects: { treasury: 10, paranoia: 8 }, result: 'The prophecy: "It will be full, then empty, then full of something else." The accountants are already drafting a rebuttal.' },
+      { label: 'Mark it as spam.', effects: { paranoia: 10, plebs: -5 }, result: 'Her next prophecy was about you, specifically. It was spam.' },
+    ],
+  },
+  {
+    id: 'printing_bill',
+    title: 'A Printing Press Bill',
+    text: 'A senator proposes that every citizen must own a printing press. He has already printed the law. It is eleven feet long and has not yet been read.',
+    choices: [
+      { label: 'Sign it, to see what happens.', effects: { plebs: 10, treasury: -5, paranoia: 5 }, result: 'Everyone now owns a printing press. Everyone is now printing opinions. Nothing else has been printed in a month.' },
+      { label: 'Tax the printing presses.', effects: { treasury: 15, plebs: -10 }, result: 'The tax was passed. The presses were printed with the tax, and then the tax was printed on the presses.' },
+      { label: 'Burn the law, then the press.', effects: { paranoia: -5, plebs: -5, senate: -10 }, result: 'The senator has since announced a second law, about fire safety, which is eleven feet long.' },
+    ],
+  },
+  {
+    id: 'cat_senator',
+    title: 'A Cat Has Been Elected to the Senate, Again',
+    text: 'The cat was elected by a margin of two votes and one nap. It has been asked to abstain. It is abstaining from everything.',
+    choices: [
+      { label: 'Confirm the election.', effects: { senate: -5, plebs: 10 }, result: 'The cat has been sworn in. It sat on the oath. It was not asked to get off.' },
+      { label: 'Hold a recount, with treats.', effects: { treasury: -10, plebs: 8, senate: 5 }, result: 'The recount was unanimous. The cat was also unanimous, in its opinion of the treats.' },
+      { label: 'Let the cat govern. Honestly, why not.', effects: { plebs: 8, senate: -15, morale: 5 }, result: 'The cat has passed three laws, all of them about warmth. The plebs are delighted. The Senate is in a warm corner.' },
+    ],
+  },
+  // ----- Follow-up events. These only appear once a flag set by an earlier choice is on the table. -----
+  {
+    id: 'bakers_organise',
+    title: 'The Bakers Have Organised',
+    text: 'The bakers you blamed have formed a guild. Its first resolution declares you a considerable inconvenience to bread. They have also opened a bakery, which is competing with the Empire.',
+    needsFlag: 'baker_blamed',
+    choices: [
+      { label: 'Recognise the guild, with a tax on crusts.', effects: { treasury: 12, plebs: -5 }, result: 'The guild paid. The crusts paid more. The bread is still missing, but now it is taxed.' },
+      { label: 'Recognise the guild, with a hug.', effects: { plebs: 8, paranoia: -5 }, result: 'The bakers were hugged. They have since been very difficult to hug again.' },
+      { label: 'Outlaw the guild.', effects: { paranoia: 10, plebs: -10, treasury: 5 }, result: 'The guild went underground. Its bread is underground too, which is worse for everyone.' },
+    ],
+  },
+  {
+    id: 'sunset_photoshopped',
+    title: 'The Sunset Was Edited',
+    text: 'A rival feed has proven that your sunset was taken at noon, in another city, with a filter called "Sad Empire". The hashtag has turned on you.',
+    needsFlag: 'sunset_posted',
+    choices: [
+      { label: 'Post a sunrise to cover it.', effects: { plebs: 8, treasury: -5 }, result: 'The sunrise was real and is trending. Nobody trusts it. It is, at least, early.' },
+      { label: 'Sue the rival feed.', effects: { treasury: -15, senate: 5 }, result: 'The lawsuit will take nine years. By then everyone will have forgotten the sunset, including you.' },
+      { label: 'Claim the photo is art.', effects: { plebs: 5, senate: -5, paranoia: 3 }, result: 'The critics have called it "bold", which is what critics call things they cannot explain.' },
+    ],
+  },
+  {
+    id: 'goose_committee',
+    title: 'The Goose Demands a Committee Seat',
+    text: 'The consecrated goose has been seen at the Senate door. It is holding a small scroll, which it has eaten. Parts of the scroll were a bill.',
+    needsFlag: 'goose_consecrated',
+    choices: [
+      { label: 'Give it a committee: Waterfowl and Public Works.', effects: { senate: 5, plebs: 8, treasury: -5 }, result: 'The committee has met once. It honked, the minutes were eaten, and a bridge was approved.' },
+      { label: 'Chase it out with a broom.', effects: { morale: -5, plebs: -5, paranoia: 5 }, result: 'The goose was chased out. It returned by the back entrance, which was never locked, because nobody thought it needed one.' },
+      { label: 'Ask it to vote. It honks yes.', effects: { senate: -5, plebs: 10 }, result: 'It honked yes. The Senate asked whether that was a vote. The goose honked yes again.' },
+    ],
+  },
+  {
+    id: 'lion_seconds',
+    title: 'The Lion Wants Seconds',
+    text: 'The lion has finished its dinner and is now looking at the budget as though it were a sheep.',
+    needsFlag: 'lions_fed',
+    choices: [
+      { label: 'Feed it the budget committee.', effects: { senate: -15, plebs: 10, treasury: 5 }, result: 'The committee was very tough. The lion said so. The plebs cheered for the lion, who has no vote.' },
+      { label: 'Feed it a sheep, at great expense.', effects: { treasury: -20, plebs: 5 }, result: 'The sheep was delicious and extremely expensive. The lion has written a thank-you note, in blood, on the invoice.' },
+      { label: 'Explain politely that lions do not have a vote.', effects: { plebs: -5, paranoia: 5 }, result: 'The lion has been informed. It has not been convinced. Its tail has been informed too.' },
+    ],
+  },
+  {
+    id: 'farmers_revolt',
+    title: 'The Tax Farmers Unionise Against the Audit',
+    text: 'Following your audit, the tax farmers have formed a movement called "Taxes Are Our Problem Too". It is loud. It has a drum.',
+    needsFlag: 'farmers_audited',
+    choices: [
+      { label: 'Negotiate a tax-free harvest.', effects: { treasury: -15, plebs: 10 }, result: 'A tax-free harvest was granted for one season. It was the best harvest anyone can remember, and it was entirely theirs.' },
+      { label: 'Arrest the drummer.', effects: { paranoia: 10, plebs: -10 }, result: 'The drummer was arrested. The drum was not. It is now played by the entire Forum, at night, out of tune.' },
+      { label: 'Join the drum circle.', effects: { plebs: 10, morale: 5, paranoia: -5, treasury: -5 }, result: 'You played. You were terrible. The farmers have made you an honorary member, which costs nothing and means everything.' },
+    ],
+  },
+  {
+    id: 'secret_poster',
+    title: 'The Secret Is on a Poster',
+    text: 'The secret you told the ceiling is now on a poster outside the baths. It has been translated into four languages. Three of them are accurate.',
+    needsFlag: 'secret_told',
+    choices: [
+      { label: 'Tear down the poster.', effects: { paranoia: 8, plebs: -8 }, result: 'The poster has been torn down. Its replacement is a larger poster, with a question mark where your name was.' },
+      { label: 'Print a bigger poster with a denial.', effects: { treasury: -10, plebs: 5, senate: -5 }, result: 'The denial was printed in very small letters. The secret was printed in very large ones.' },
+      { label: 'Admit it, dramatically.', effects: { plebs: 12, senate: -10 }, result: 'You admitted everything, on the steps, with feeling. The plebs wept. The Senate is drafting a motion of concern.' },
+    ],
+  },
   // ----- Tag-specific events -----
   {
     id: 'memoir',
@@ -401,7 +529,7 @@ export const EVENTS = [
     text: 'Your Forum Feed has three million followers and one dissenting baker, who keeps replying with the word "bread".',
     requires: ['media'],
     choices: [
-      { label: 'Post a sunset with a caption about unity.', effects: { plebs: 15, senate: -5 }, result: 'The sunset was tremendous. The caption was a lie. The engagement, however, was real.' },
+      { label: 'Post a sunset with a caption about unity.', setFlags: ['sunset_posted'], effects: { plebs: 15, senate: -5 }, result: 'The sunset was tremendous. The caption was a lie. The engagement, however, was real.' },
       { label: 'Block the baker.', effects: { paranoia: 5, plebs: -5 }, result: 'The baker was blocked. He is now posting from an alt account called "bread2".' },
       { label: 'Start a hashtag. #OneRome.', effects: { treasury: -5, plebs: 10, senate: -5 }, result: 'The hashtag is trending. Nobody knows what it means. Advertisers are very interested.' },
     ],
@@ -519,7 +647,7 @@ export const EVENTS = [
     requires: ['paranoid'],
     choices: [
       { label: 'Repaint the ceiling.', effects: { treasury: -15, paranoia: -10 }, result: 'The ceiling is now silent, which is worse. Tiberius is pleased.' },
-      { label: 'Tell the ceiling a secret, to test it.', effects: { paranoia: 5, plebs: -5 }, result: 'The ceiling has spread it. By lunch the secret was on a poster outside the baths.' },
+      { label: 'Tell the ceiling a secret, to test it.', setFlags: ['secret_told'], effects: { paranoia: 5, plebs: -5 }, result: 'The ceiling has spread it. By lunch the secret was on a poster outside the baths.' },
       { label: 'Hire a Keeper of the Ceiling.', effects: { treasury: -10, senate: 5, paranoia: -5 }, result: 'The Keeper has been hired. The ceiling has been informed. The ceiling is considering a counter-offer.' },
     ],
   },
@@ -600,3 +728,87 @@ export const HEADLINES = [
   'CENSUS FINDS FOUR MILLION CITIZENS, ONE OF WHOM IS A CHEESE',
   'EMPEROR BEGINS REIGN WITH A STRONG SENSE OF THE TIMING OF OTHERS',
 ];
+
+// ---------------------------------------------------------------------------
+// Emperor passives (v0.2). Each factor scales every effect that touches that stat.
+// Values above 1 amplify, below 1 dampen. Applied in engine.scaleEffects().
+// ---------------------------------------------------------------------------
+export const PASSIVES = {
+  little_boots: { plebs: 1.5 },
+  lucia: { plebs: 1.3, senate: 0.8 },
+  dorcas: { treasury: 1.25 },
+  octavia: { plebs: 1.4, senate: 0.7 },
+  pompeius: { morale: 1.5 },
+  tiberius: { paranoia: 1.4 },
+  severus: { treasury: 1.2 },
+  claudius: { morale: 0.6 },
+  brutus: { paranoia: 1.3 },
+  magnus: { senate: 1.5 },
+  helena: { plebs: 1.5, treasury: 0.7 },
+  anserus: { paranoia: 0.5 },
+  cassia: { senate: 1.3 },
+  bartholomew: { treasury: 0.5 },
+};
+
+const STAT_NAME = Object.fromEntries(STATS.map((s) => [s.key, s.label]));
+
+export function passiveText(emperorId) {
+  const factors = PASSIVES[emperorId];
+  if (!factors) return '';
+  return Object.entries(factors)
+    .map(([key, f]) => `${STAT_NAME[key]} effects ×${f} ${f > 1 ? '(stronger)' : '(muted)'}`)
+    .join('; ');
+}
+
+// ---------------------------------------------------------------------------
+// Guard perks (v0.2). Unlocked by reigns served; chosen on the lottery screen.
+// ---------------------------------------------------------------------------
+export const PERKS = [
+  { id: 'iron_rations', name: 'Iron Rations', text: 'Start each reign with +10 Guard Morale.', unlockAt: 1, mods: { morale: 10 } },
+  { id: 'shadow_ledger', name: 'Shadow Ledger', text: 'Start each reign with +12 Treasury.', unlockAt: 2, mods: { treasury: 12 } },
+  { id: 'quiet_informants', name: 'Quiet Informants', text: 'Start each reign with -10 Paranoia.', unlockAt: 3, mods: { paranoia: -10 } },
+  { id: 'loaded_dice', name: 'Loaded Dice', text: 'Gambles succeed 15 percentage points more often.', unlockAt: 4, chanceBonus: 0.15 },
+  { id: 'loud_herald', name: 'Loud Herald', text: 'Start each reign with +10 Mob Mood.', unlockAt: 6, mods: { plebs: 10 } },
+];
+
+// ---------------------------------------------------------------------------
+// Difficulty (v0.2). Scales the daily upkeep.
+// ---------------------------------------------------------------------------
+export const DIFFICULTIES = {
+  clement: { label: 'Clement', upkeepMult: 0.5, blurb: 'The Empire is nearly self-sufficient. Suspiciously so.' },
+  roman: { label: 'Roman', upkeepMult: 1, blurb: 'Standard. Expect betrayal. Expect lions.' },
+  cynical: { label: 'Cynical', upkeepMult: 1.5, blurb: 'Everything costs more, including your dignity.' },
+};
+
+export const DEFAULT_SETTINGS = { sound: true, difficulty: 'roman' };
+
+// ---------------------------------------------------------------------------
+// Advisor (v0.2). Commentary keyed to whichever stat is closest to failure.
+// ---------------------------------------------------------------------------
+export const ADVISOR_CALM = [
+  'Everything is fine. This is the most dangerous thing you could have told me.',
+  'The Empire is stable, in the sense that it has not yet fallen over.',
+];
+
+export const ADVISOR = {
+  treasury: [
+    'The Treasury is empty. We have begun selling the furniture. Some of it is yours.',
+    'We have counted the coins twice. We got two different numbers, and both were embarrassing.',
+  ],
+  plebs: [
+    'The mob has begun chanting your name. It is not a compliment.',
+    'Bread is a rumour. The mob has started believing rumours in its place.',
+  ],
+  senate: [
+    'The Senate is drafting your replacement. It is on the second page of the agenda.',
+    'Senators are calling it "a conversation". It is a vote with better manners.',
+  ],
+  paranoia: [
+    'You have checked the ceiling again. The ceiling is worried about you.',
+    'Your guards have been told to stop following you. They have started following your shadow instead.',
+  ],
+  morale: [
+    'The Guard is sitting down during drills. Sitting is how mutinies begin.',
+    'Your legionaries have written a petition. It has more signatures than the Senate.',
+  ],
+};

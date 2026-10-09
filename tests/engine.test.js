@@ -9,10 +9,26 @@ import {
   START_STATS,
   STATS,
   UPKEEP,
+  PERKS,
+  DIFFICULTIES,
+  PASSIVES,
+  ADVISOR,
+  ADVISOR_CALM,
 } from '../js/data.js';
 import {
+  advisorLine,
   checkEnd,
   createReign,
+  epitaphText,
+  gambleChance,
+  legacyScore,
+  netTone,
+  plainName,
+  recordReign as recordReignV2,
+  scaleEffects,
+  unlockedPerks,
+  lockedPerks,
+  applyUpkeep,
   currentEvent,
   drawCandidates,
   eligibleEvents,
@@ -163,10 +179,12 @@ test('resolveChoice applies deterministic effects, logs, and advances the day', 
   assert.equal(reign.used.length, 1);
   assert.equal(reign.log.length, 1);
   assert.equal(reign.current, ev.id, 'event stays on the table until the player moves on');
-  // Expected = before + choice effect + daily upkeep, clamped to 0..100.
+  // Expected = (before + passive-scaled choice effect, clamped), then + daily upkeep, clamped.
+  const scaled = scaleEffects(dorcas, choice.effects || {});
   for (const key of STAT_KEYS) {
-    const delta = (choice.effects || {})[key] || 0;
-    const expected = Math.max(0, Math.min(100, before[key] + delta + (UPKEEP[key] || 0)));
+    const delta = scaled[key] || 0;
+    const afterChoice = Math.max(0, Math.min(100, before[key] + delta));
+    const expected = Math.max(0, Math.min(100, afterChoice + (UPKEEP[key] || 0)));
     assert.equal(reign.stats[key], expected, `${key} after ${choice.label}`);
   }
   assert.equal(result.result, choice.result);
@@ -302,4 +320,137 @@ test('the game is not trivially winnable by always picking the first choice', ()
   }
   // Informational guard: both survival and failure should happen in real numbers.
   assert.ok(natural > 0 && natural < total, `natural endings: ${natural}/${total}`);
+});
+
+// ---------------------------------------------------------------- v0.2
+
+test('every flag that unlocks a follow-up is set by some choice', () => {
+  const setters = new Set();
+  for (const ev of EVENTS) {
+    for (const c of ev.choices) {
+      for (const f of [...(c.setFlags || []), ...((c.gamble && [...(c.gamble.win.setFlags || []), ...(c.gamble.lose.setFlags || [])]) || [])]) setters.add(f);
+    }
+  }
+  for (const ev of EVENTS.filter((e) => e.needsFlag)) {
+    assert.ok(setters.has(ev.needsFlag), `${ev.id} needs flag "${ev.needsFlag}" that nothing sets`);
+  }
+});
+
+test('choosing a flag-setting option makes its follow-up eligible, and not before', () => {
+  const reign = createReign(EMPERORS.find((e) => e.id === 'little_boots'), { rng: makeRng(4) });
+  const followUpIds = EVENTS.filter((e) => e.needsFlag).map((e) => e.id);
+  assert.ok(!eligibleEvents(reign).some((e) => followUpIds.includes(e.id)), 'follow-up appeared with no flags');
+  reign.flags.add('baker_blamed');
+  assert.ok(eligibleEvents(reign).some((e) => e.id === 'bakers_organise'), 'bakers_organise should unlock');
+});
+
+test('resolveChoice records flags set by the chosen option', () => {
+  const reign = createReign(EMPERORS[0], { rng: makeRng(8) });
+  reign.current = 'bread_situation';
+  resolveChoice(reign, 1); // "Blame the bakers, publicly."
+  assert.ok(reign.flags.has('baker_blamed'));
+});
+
+test('passives scale effects, preserve sign, and never erase a nonzero change', () => {
+  const dorcas = EMPERORS.find((e) => e.id === 'dorcas');
+  assert.deepEqual(scaleEffects(dorcas, { treasury: 20, plebs: -5 }), { treasury: 25, plebs: -5 });
+  const anserus = EMPERORS.find((e) => e.id === 'anserus');
+  assert.deepEqual(scaleEffects(anserus, { paranoia: 1 }), { paranoia: 1 }, 'a 1 should not round to 0');
+  assert.deepEqual(scaleEffects({ id: 'nobody' }, { morale: -7 }), { morale: -7 });
+  for (const id of Object.keys(PASSIVES)) assert.ok(EMPERORS.some((e) => e.id === id), `passive for unknown emperor ${id}`);
+});
+
+test('perks unlock by reigns served and their stat mods apply at reign start', () => {
+  assert.deepEqual(unlockedPerks(0), []);
+  assert.ok(unlockedPerks(1).some((p) => p.id === 'iron_rations'));
+  assert.ok(lockedPerks(1).some((p) => p.id === 'loud_herald'));
+  const base = createReign(EMPERORS[0], { rng: makeRng(1) });
+  const withPerk = createReign(EMPERORS[0], { rng: makeRng(1), perkId: 'shadow_ledger' });
+  assert.equal(withPerk.stats.treasury, Math.min(100, base.stats.treasury + 12));
+  assert.equal(withPerk.perk.id, 'shadow_ledger');
+  const bogus = createReign(EMPERORS[0], { rng: makeRng(1), perkId: 'not_a_perk' });
+  assert.equal(bogus.perk, null);
+});
+
+test('loaded dice raise gamble odds, capped below certainty', () => {
+  const choice = { gamble: { chance: 0.5, win: {}, lose: {} } };
+  assert.equal(gambleChance({ perk: null }, choice), 0.5);
+  assert.ok(Math.abs(gambleChance({ perk: PERKS.find((p) => p.id === 'loaded_dice') }, choice) - 0.65) < 1e-9);
+  assert.ok(gambleChance({ perk: { chanceBonus: 5 } }, choice) <= 0.95);
+});
+
+test('difficulty scales upkeep: Clement is gentler, Cynical is harsher', () => {
+  const clement = createReign(EMPERORS[0], { rng: makeRng(1), difficulty: 'clement' });
+  const cynical = createReign(EMPERORS[0], { rng: makeRng(1), difficulty: 'cynical' });
+  const roman = createReign(EMPERORS[0], { rng: makeRng(1), difficulty: 'roman' });
+  const before = (r) => ({ ...r.stats });
+  const b1 = before(clement);
+  const c1 = applyUpkeep(clement);
+  const r1 = applyUpkeep(roman);
+  const y1 = applyUpkeep(cynical);
+  assert.ok(Math.abs(c1.treasury) < Math.abs(r1.treasury), 'clement treasury upkeep should be smaller');
+  assert.ok(Math.abs(y1.treasury) > Math.abs(r1.treasury), 'cynical treasury upkeep should be larger');
+  assert.equal(b1.treasury + c1.treasury, clement.stats.treasury);
+  assert.equal(createReign(EMPERORS[0], { difficulty: 'nonsense' }).difficulty, 'roman');
+  assert.ok(DIFFICULTIES.roman.upkeepMult === 1);
+});
+
+test('advisor speaks about the most endangered stat, and is calm when nothing is wrong', () => {
+  const reign = createReign(EMPERORS[0], { rng: makeRng(1) });
+  reign.day = 0;
+  assert.ok(ADVISOR_CALM.includes(advisorLine(reign)));
+  reign.stats.treasury = 5;
+  assert.ok(ADVISOR.treasury.includes(advisorLine(reign)));
+  const paranoid = createReign(EMPERORS[0], { rng: makeRng(1) });
+  paranoid.stats.paranoia = 95;
+  assert.ok(ADVISOR.paranoia.includes(advisorLine(paranoid)));
+});
+
+test('legacy score rewards days, a healthy realm, and a natural ending', () => {
+  const healthy = { treasury: 60, plebs: 60, senate: 60, morale: 60, paranoia: 10 };
+  const natural = legacyScore({ days: 8, stats: healthy, cause: 'natural' });
+  const bankrupt = legacyScore({ days: 8, stats: healthy, cause: 'bankrupt' });
+  assert.ok(natural > bankrupt);
+  assert.ok(legacyScore({ days: 8, stats: healthy, cause: 'natural' }) > legacyScore({ days: 3, stats: healthy, cause: 'natural' }));
+  assert.ok(legacyScore({ days: 8, stats: { ...healthy, paranoia: 90 }, cause: 'natural' }) < natural);
+});
+
+test('recorded reigns carry legacy, epitaph and difficulty, and epitaphs are shareable', () => {
+  const save = emptySave();
+  const reign = createReign(EMPERORS[0], { rng: makeRng(2), difficulty: 'cynical', perkId: 'iron_rations' });
+  reign.day = 8;
+  checkEnd(reign);
+  recordReignV2(save, reign);
+  const rec = save.reigns[0];
+  assert.equal(rec.difficulty, 'cynical');
+  assert.equal(rec.perkId, 'iron_rations');
+  assert.equal(rec.legacy, reign.record.legacy);
+  assert.equal(reign.record, rec);
+  const text = epitaphText(rec);
+  assert.ok(text.includes(plainName(EMPERORS[0].name)));
+  assert.ok(text.includes('Choose Your Emperor...As Many Times as it Takes!'));
+  assert.ok(text.includes(String(rec.legacy)));
+});
+
+test('netTone classifies an outcome as good, bad, or neutral', () => {
+  assert.equal(netTone({ treasury: 10, paranoia: -5 }), 1);
+  assert.equal(netTone({ treasury: -10, plebs: -5 }), -1);
+  assert.equal(netTone({ treasury: 5, plebs: -5 }), 0);
+});
+
+test('follow-ups do not break the simulation: reigns still end, and flag-driven events do appear', () => {
+  let sawFollowUp = false;
+  for (let seed = 1; seed <= 400; seed++) {
+    const rng = makeRng(seed);
+    const reign = createReign(EMPERORS[seed % EMPERORS.length], { rng, difficulty: seed % 3 === 0 ? 'cynical' : 'roman' });
+    let guard = 0;
+    while (!reign.over) {
+      if (++guard > 50) assert.fail(`reign ${seed} did not terminate`);
+      const ev = nextEvent(reign);
+      assert.ok(ev, 'no event');
+      if (ev.needsFlag) sawFollowUp = true;
+      resolveChoice(reign, Math.floor(rng() * ev.choices.length));
+    }
+  }
+  assert.ok(sawFollowUp, 'no follow-up event ever appeared in 400 reigns');
 });
