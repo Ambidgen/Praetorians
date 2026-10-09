@@ -169,9 +169,10 @@ function renderTitle() {
     `
     <section class="title-screen">
       <div class="title-plate panel">
-        <p class="kicker">A Dark Cozy Pixel Art Praetorian Guard Simulator</p>
+        <p class="kicker">A Pixel Art Praetorian Guard Simulator</p>
         <h1 class="logo">PRAETORIANS</h1>
         <p class="slogan"><span>${esc(SLOGAN_LINE_1)}</span><br /><span class="slogan-2">${esc(SLOGAN_LINE_2)}</span></p>
+        <p class="tagline">Power performs. The guard applauds.</p>
       </div>
       <div class="menu">
         <button class="btn big" data-action="start" data-autofocus>Serve the Empire</button>

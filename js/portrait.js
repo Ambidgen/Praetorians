@@ -14,30 +14,30 @@ const SKINS = [
 ];
 const HAIRS = ['#2b1d14', '#c9a04c', '#9a9a9a', '#7a2b1f', '#f2eee4', '#1b1b2e'];
 const CLOTHS = [
-  ['#7a1f2b', '#4f1119'],
-  ['#3d2a5c', '#261a3b'],
-  ['#e8dcc4', '#b9ae98'],
-  ['#2f5a3c', '#1d3a27'],
-  ['#8a6a24', '#5c4415'],
+  ['#8e1b2c', '#5e0f1c'], // crimson
+  ['#2b2750', '#1e1b3a'], // navy
+  ['#c9a03a', '#8c6a22'], // gold trim
+  ['#3d3874', '#2b2750'], // violet navy
+  ['#e7e1f3', '#b9b0d3'], // marble white
 ];
 const BGS = [
-  ['#2a2038', '#211a2d'],
-  ['#332a44', '#2a2238'],
-  ['#1f2a33', '#18222a'],
-  ['#3a2530', '#2e1d27'],
+  ['#e7e1f3', '#cdc4e2'], // lavender marble
+  ['#f1ece4', '#dcd2c0'], // warm marble
+  ['#dcd9ea', '#c3bed6'], // cool marble
+  ['#efe3e6', '#dcc7cd'], // rose marble
 ];
 
 const C = {
-  ink: '#120d18',
-  white: '#f5f1e6',
-  metal: '#b9bfc8',
-  metalDark: '#6b7280',
-  gold: '#e8b84a',
-  goldDark: '#9a6b1e',
-  red: '#b3262e',
+  ink: '#1e1b3a',
+  white: '#f7f4fb',
+  metal: '#8f97ad',
+  metalDark: '#4d5470',
+  gold: '#e0b44a',
+  goldDark: '#a9782a',
+  red: '#8e1b2c',
   leaf: '#5f9e5a',
   leafDark: '#33602f',
-  blush: '#e0786a',
+  blush: '#d9807a',
   gooseShade: '#c9c3b3',
   orange: '#e8862a',
   ghost: '#d8e4ff',

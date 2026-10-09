@@ -1,5 +1,5 @@
 # Praetorians
-A Dark Cozy Pixel Art Praetorian Guard Simulator.
+A Pixel Art Praetorian Guard Simulator, set in a most serious court.
 
 **Praetorians: Choose Your Emperor...As Many Times as it Takes!**
 
