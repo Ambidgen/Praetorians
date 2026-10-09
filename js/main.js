@@ -168,6 +168,9 @@ function renderTitle() {
   render(
     `
     <section class="title-screen">
+      <figure class="court-art">
+        <img src="assets/court.png" width="1536" height="1024" alt="Pixel art of a pale marble throne room: a gold throne, crimson banners, navy-armoured guards, and kneeling courtiers." />
+      </figure>
       <div class="title-plate panel">
         <p class="kicker">A Pixel Art Praetorian Guard Simulator</p>
         <h1 class="logo">PRAETORIANS</h1>
