@@ -10,6 +10,11 @@ export function hasSprite(id) {
   return Object.prototype.hasOwnProperty.call(SPRITES, id);
 }
 
+// Emperors from the roster that have a breathing sprite. Others keep their canvas portrait.
+export function hasEmperorSprite(id) {
+  return hasSprite(id) && SPRITES[id].group === 'emperor';
+}
+
 // Stagger the breathing so the court does not inhale in unison.
 function delayFor(index) {
   return ((index * 0.37) % 3.6).toFixed(2);
@@ -27,6 +32,7 @@ export function sprite(id, { scale = 1, index = 0, label = null, cls = '' } = {}
 // The whole court as a row of captioned figures for the title screen.
 export function castRow(scale = 0.55) {
   return Object.entries(SPRITES)
+    .filter(([, s]) => s.group === 'court')
     .map(([id, s], i) => `
       <figure class="cast-figure">
         ${sprite(id, { scale, index: i, label: s.label })}

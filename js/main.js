@@ -35,7 +35,7 @@ import { paintPortrait } from './portrait.js';
 import { clearSave, loadSave, saveSave } from './store.js';
 import { isSoundEnabled, setSoundEnabled, sfx } from './audio.js';
 import { esc } from './util.js';
-import { castRow, sprite } from './sprites.js';
+import { castRow, hasEmperorSprite, sprite } from './sprites.js';
 
 const app = document.getElementById('app');
 
@@ -75,6 +75,15 @@ function render(html, { screenClass = '' } = {}) {
 
 function portrait(emperorId, size = 'md') {
   return `<canvas class="portrait portrait-${size}" data-emperor="${esc(emperorId)}" width="24" height="24" aria-label="Portrait"></canvas>`;
+}
+
+// Sprite heights match the portrait boxes: sm 72px, lg 144px, xl 216px.
+const EMPEROR_ART_SCALE = { sm: 0.5, md: 0.67, lg: 1, xl: 1.5 };
+
+// An emperor's sprite when one exists, otherwise the procedural portrait.
+function emperorArt(id, name, size = 'md') {
+  if (!hasEmperorSprite(id)) return portrait(id, size);
+  return `<div class="emperor-art">${sprite(id, { scale: EMPEROR_ART_SCALE[size] ?? 1, label: name, cls: 'emperor-sprite' })}</div>`;
 }
 
 function headline() {
@@ -227,7 +236,7 @@ function renderSelect() {
       const passive = passiveText(emp.id);
       return `
         <article class="card panel">
-          ${portrait(emp.id, 'lg')}
+          ${emperorArt(emp.id, emp.name, 'lg')}
           <h3>${esc(emp.name)}</h3>
           <p class="etitle">${esc(emp.title)}</p>
           <p class="blurb">${esc(emp.blurb)}</p>
@@ -332,7 +341,7 @@ function renderReign() {
 
     <div class="reign-grid">
       <aside class="panel dossier">
-        <div class="dossier-portrait">${portrait(emp.id, 'xl')}</div>
+        <div class="dossier-portrait">${emperorArt(emp.id, emp.name, 'xl')}</div>
         <h2 class="dossier-name">${esc(emp.name)}</h2>
         <p class="etitle">${esc(emp.title)}</p>
         ${passive ? `<p class="passive"><b>Passive:</b> ${esc(passive)}</p>` : ''}
@@ -404,7 +413,7 @@ function renderEnd() {
       <p class="kicker">Reign No. ${reignNo} Concluded &middot; ${reign.day} of ${reign.length} days served &middot; ${esc(difficultyLabel())}</p>
       <h1 class="end-title">${esc(over.title)}</h1>
       <div class="panel epitaph">
-        <div class="epitaph-portrait">${portrait(emp.id, 'lg')}</div>
+        <div class="epitaph-portrait">${emperorArt(emp.id, emp.name, 'lg')}</div>
         <div class="epitaph-body">
           <h3>${esc(emp.name)}</h3>
           <p class="etitle">${esc(emp.title)}</p>
@@ -441,7 +450,7 @@ function renderHall() {
         .map(
           (r) => `
           <li class="hall-row panel">
-            ${portrait(r.emperorId, 'sm')}
+            ${emperorArt(r.emperorId, r.name, 'sm')}
             <div>
               <h4>${esc(r.name)}</h4>
               <p class="etitle">${esc(r.title)}</p>

@@ -48,6 +48,8 @@ Or open `index.html` through any static file server.
 
 Ten characters (the Emperor, a Praetorian Guard, a Guard Captain, a Courtier, a Senator, a Herald, a Court Advisor, a Cheesemonger, a Baker, and The Goose) each have a four-frame breathing loop. The loop plays ping-pong (inhale, full breath, exhale), with the figures staggered so they do not breathe in unison. The title screen shows the whole court. The Advisor, Herald, Courtier, and Goose appear beside the advisor line, in the outcome dialog, on the ending screen, and in the Hall. Motion stops under `prefers-reduced-motion`.
 
+Ten emperors also have breathing sprites: Little Boots, Lucia Vexmarch, Dorcas of Ostia, Octavia Minor, Pompeius the Retired, Tiberius, Severus the Cheesemonger, Claudius (Backwards), Brutus the Pragmatist, and Helena the Lyre-Strummer. They replace the canvas portraits on the lottery cards, the reign dossier, the ending, and the Hall. The other four emperors (Anserus, Cassia, Magnus, and Bartholomew) keep their procedural portraits.
+
 To rebuild the sprites after changing the base art:
 
 ```bash

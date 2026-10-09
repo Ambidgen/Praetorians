@@ -668,3 +668,9 @@ button:focus-visible { outline: 3px dashed var(--gold-2); outline-offset: 4px; }
 
 .hall-goose { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 8px; }
 .hall-goose .fine { text-align: center; }
+
+/* Emperor sprites take the place of the canvas portraits. The sprite's height
+   equals the portrait box, so the layout does not move. */
+.emperor-art { display: flex; justify-content: center; align-items: flex-end; flex: none; }
+.card .emperor-art { align-self: center; }
+.dossier-portrait .emperor-art { margin: 0 auto; }

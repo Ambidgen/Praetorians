@@ -62,6 +62,28 @@ CHARACTERS = [
     ("goose", "The Goose"),
 ]
 
+# Ten emperors from js/data.js. Ids match the emperor ids, so the game can look a
+# sprite up directly. Anserus (a goose), Bartholomew (a potato), Cassia (a ghost)
+# and Magnus keep their procedural portraits.
+EMPEROR_SPRITES = [
+    ("little_boots", "Little Boots"),
+    ("lucia", "Lucia Vexmarch"),
+    ("dorcas", "Dorcas of Ostia"),
+    ("octavia", "Octavia Minor"),
+    ("pompeius", "Pompeius the Retired"),
+    ("tiberius", "Tiberius, Mildly Disappointed"),
+    ("severus", "Severus the Cheesemonger"),
+    ("claudius", "Claudius (Backwards)"),
+    ("brutus", "Brutus the Pragmatist"),
+    ("helena", "Helena the Lyre-Strummer"),
+]
+
+# Every sprite the pipeline builds, with its group: "court" figures or "emperor" figures.
+ALL_SPRITES = (
+    [(cid, label, "court") for cid, label in CHARACTERS]
+    + [(cid, label, "emperor") for cid, label in EMPEROR_SPRITES]
+)
+
 
 def magenta_mix(r, g, b):
     """How magenta a pixel is: the smaller of red and blue, minus green."""
@@ -179,12 +201,12 @@ def write_manifest(entries):
         "export const SPRITE_CELL = { w: %d, h: %d };" % (CELL_W, CELL_H),
         "export const SPRITES = {",
     ]
-    for char_id, label in CHARACTERS:
+    for char_id, label, group in ALL_SPRITES:
         e = entries[char_id]
         rel = e["file"].relative_to(ROOT).as_posix()
         lines.append(
-            "  %s: { src: %s, label: %s, frames: %d }," % (
-                json.dumps(char_id), json.dumps(rel), json.dumps(label), e["frames"])
+            "  %s: { src: %s, label: %s, frames: %d, group: %s }," % (
+                json.dumps(char_id), json.dumps(rel), json.dumps(label), e["frames"], json.dumps(group))
         )
     lines.append("};")
     MANIFEST.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -193,12 +215,12 @@ def write_manifest(entries):
 def main(argv):
     mode = argv[1] if len(argv) > 1 else "all"
     if mode in ("build", "all"):
-        for char_id, _ in CHARACTERS:
+        for char_id, _, _ in ALL_SPRITES:
             out = build_sheet(char_id)
             print(f"sheet   {out.relative_to(ROOT)}")
     if mode in ("extract", "all"):
         entries = {}
-        for char_id, _ in CHARACTERS:
+        for char_id, _, _ in ALL_SPRITES:
             e = extract_sheet(char_id)
             entries[char_id] = e
             print(f"strip   {e['file'].relative_to(ROOT)}  frames={e['frames']} "
